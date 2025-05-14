@@ -330,24 +330,6 @@ export default class FarmerServiceImpl implements FarmerService {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    
 
     // async addUserRole(login: string, role: string): Promise<UserDto> {

@@ -5,9 +5,6 @@ import {Client} from "../model/Client";
 import {ForbiddenError, HttpError, NotFoundError} from "routing-controllers";
 import {encodeBase64} from "../../farmerAcc/utils/utilsForPassword";
 import jwt from "jsonwebtoken";
-//import OrderDto from "../dto/OrderDto";
-//import {Order} from "../model/Order";
-//import NewOrderDto from "../dto/NewOrderDto";
 import { Bag } from "../../farmerAcc/model/Bag";
 import BagDto from "../../farmerAcc/dto/BagDto";
 //import expressAsyncHandler from "express-async-handler";
@@ -116,10 +113,7 @@ export default class ClientServiceImpl implements ClientService {
                     bag.customer = 'none';
                     return bag.save();
                 })); 
-                // const orders = await Order.find({customer: login});
-                // await Promise.all(orders.map(order => {
-                //     return order.deleteOne();
-                // })); 
+
                 await client.deleteOne();
              return new ClientDto(client.login, client.firstName, client.lastName,
                 client.email, client.phone, client.role);
@@ -127,10 +121,6 @@ export default class ClientServiceImpl implements ClientService {
         
         
     async createOrder(customer: string, farmer: string, bagName: string): Promise<BagDto> {
-        // const client = await Client.findOne({login: customer});
-        // if (client === null) {
-        //     throw new HttpError(404, `Client with login ${customer} not found`);
-        // }
 
         const bag = await Bag.findOne({login:farmer, name: bagName});
         if (bag === null) {
@@ -140,34 +130,11 @@ export default class ClientServiceImpl implements ClientService {
             throw new ForbiddenError(`Bag from farmer ${farmer} with name ${bagName} is already ordered`);
         }
 
-        // const order = new Order({
-        //     customer: customer,
-        //     farmer: farmer,
-        //     bagName: bagName
-        // });
-        // const res = await order.save();
-
-        // const bag = await Bag.findOne({login:farmer, name: bagName});
-        // if (bag === null) {
-        //     throw new HttpError(404, `Bag from farmer ${farmer} with name ${bagName} not found`);
-        // }
         bag.customer = customer; // set the customer of the bag to the client who ordered it
         await bag.save(); // save the updated bag to the database
-        //return new OrderDto(customer, farmer, bagName);
         return new BagDto(bag.login, bag.name, bag.product, bag.description, 
             bag.date, bag.customer, bag.confirmation, bag.payment, bag.confirmPayment);
     }
-
-
-    // async getOwnOrders(authenticatedUserLogin: string): Promise<OrderDto[]> {
-    //         const orders = await Order.find({ customer: authenticatedUserLogin });
-    //         if (orders.length === 0) {
-    //             throw new HttpError(404, `Orders from client ${authenticatedUserLogin} not found`);
-    //         }
-    //         return orders.map(order => {
-    //             return new OrderDto(order.customer, order.farmer, order.bagName)
-    //         });
-    //     }
 
 
     async getBagsWithOwnOrders(customer: string): Promise<BagDto[]> {

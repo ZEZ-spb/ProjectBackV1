@@ -1,7 +1,5 @@
 import NewClientDto from "../dto/NewClientDto";
 import ClientDto from "../dto/ClientDto";
-//import OrderDto from "../dto/OrderDto";
-//import NewOrderDto from "../dto/NewOrderDto";
 import BagDto from "../../farmerAcc/dto/BagDto";
 
 export default interface ClientService {

@@ -9,8 +9,7 @@ import {AuthenticationMiddleware} from "../Middleware/AuthenticationMiddleware";
 import { Request, Response } from "express";
 //import {ForbiddenError, HttpError, NotFoundError} from "routing-controllers";
 //import { ExpressErrorMiddlewareInterface, Middleware } from "routing-controllers";
-//import { NextFunction } from "express";
-//import BagDto from "../dto/BagDto";
+//import { NextFunction } from "express"
 import NewBagDto from "../dto/NewBagDto";
 
 
@@ -51,9 +50,7 @@ export default class FarmerController {
      //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
      @UseBefore(AuthenticationMiddleware)
      @Put('/updatePassword')
-        ///:login')     //логин того, чей пароль меняем
         async updatePassword(
-            //@Param('login') login: string,
             @Body() body: { newPassword: string },
             @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
             @Res() res: Response         
@@ -61,12 +58,7 @@ export default class FarmerController {
             if (req.body.farmer.role !== 'farmer') {
                 return res.status(403).json({ message: "You are not a farmer" });
             }
-            const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
-        
-            // if (authenticatedUserLogin !== login) {
-            //     return res.status(403).json({ message: "You can only update your own password" });
-            // }
-
+            const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена        
             const newPassword = body.newPassword; // Извлекаем новый пароль из тела запроса
         
             return await this.farmerService.updatePassword(
@@ -79,9 +71,7 @@ export default class FarmerController {
      //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)   
      @UseBefore(AuthenticationMiddleware)
      @Put('/update')
-        ///:login')
      async updateFarmer(
-         //@Param('login') login: string,
          @Body() updateFarmerDto: NewFarmerDto,
          @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
          @Res() res: Response         
@@ -90,10 +80,6 @@ export default class FarmerController {
                 return res.status(403).json({ message: "You are not a farmer" });
             }
          const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
-     
-        //  if (authenticatedUserLogin !== login) {
-        //      return res.status(403).json({ message: "You can only update your own profile" });
-        //  }
      
          return await this.farmerService.updateFarmer(
              authenticatedUserLogin,
@@ -106,9 +92,7 @@ export default class FarmerController {
      //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
     @UseBefore(AuthenticationMiddleware)
     @Delete('/remove')
-        ///:login')
     async removeFarmer(
-        //@Param('login') login: string,
         @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware 
         @Res() res: Response        
     ) {
@@ -117,9 +101,6 @@ export default class FarmerController {
         }
         const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
      
-        //  if (authenticatedUserLogin !== login) {
-        //      return res.status(403).json({ message: "You can only remove your own account" });
-        //  }
         return await this.farmerService.removeFarmer(
             authenticatedUserLogin
         );
@@ -148,7 +129,6 @@ export default class FarmerController {
     @UseBefore(AuthenticationMiddleware)
     @Get('/getFarmersByProduct/:product')   
     async getFarmersByProduct(
-    //@QueryParam('product', { required: false }) product: string,
     @Param('product') product: string,
     @Res() res: Response
     )  {
@@ -177,10 +157,8 @@ export default class FarmerController {
 
      //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
      @UseBefore(AuthenticationMiddleware)
-     //@Put('/updateBag/:login/:name')
      @Put('/updateBag/:name')
      async updateBag(
-         //@Param('login') login: string,
          @Param('name') name: string,
          @Body() updateBagDto: { product: string, description: string, date: string }, // Изменяем тип данных
          @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
@@ -190,11 +168,7 @@ export default class FarmerController {
             return res.status(403).json({ message: "You are not a farmer" });
         }
          const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
-     
-        //  if (authenticatedUserLogin !== login) {
-        //      return res.status(403).json({ message: "You can only update your own bag" });
-        //  }
-    
+        
          return this.farmerService.updateBag(
              authenticatedUserLogin, // Передаем login из токена
              name,
@@ -206,10 +180,8 @@ export default class FarmerController {
 
 
      @UseBefore(AuthenticationMiddleware)
-     //@Delete('/removeBag/:login/:name')
      @Delete('/removeBag/:name')
      async removeBag(
-         //@Param('login') login: string,
          @Param('name') name: string,
          @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
          @Res() res: Response         
@@ -219,10 +191,6 @@ export default class FarmerController {
         }      
          const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
      
-        //  if (authenticatedUserLogin !== login) {
-        //      return res.status(403).json({ message: "You can remove only your own bag" });
-        //  }
-
          return this.farmerService.removeBag(
             authenticatedUserLogin, // Передаем login из токена
             name
@@ -250,10 +218,8 @@ export default class FarmerController {
 
     //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
     @UseBefore(AuthenticationMiddleware)
-    //@Get('/getOwnBags/:login')
     @Get('/getOwnBags')
     async getOwnBags(
-    //@Param('login') login: string,  
     @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
     @Res() res: Response  
     ) { 
@@ -262,34 +228,8 @@ export default class FarmerController {
     } 
         const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
      
-        //  if (authenticatedUserLogin !== login) {
-        //      return res.status(403).json({ message: "You can see only your own bags" });
-        //  }
         return await this.farmerService.getOwnBags(authenticatedUserLogin)
     }
-
-
-
-    // //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
-    // @UseBefore(AuthenticationMiddleware)
-    // //@Get('/getOwnOrders/:login')
-    // @Get('/getOwnOrders')
-    // async getOwnOrders(
-    //     //@Param('login') login: string,
-    //     @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
-    //     @Res() res: Response
-    // ) {
-    //     if (req.body.farmer.role !== 'farmer') {
-    //         return res.status(403).json({ message: "You are not a farmer" }); 
-    //     } 
-    //     const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
-    
-    //     // if (authenticatedUserLogin !== login) {
-    //     //     return res.status(403).json({ message: "You can see only your own orders" });
-    //     // }
-    
-    //     return await this.farmerService.getOwnOrders(authenticatedUserLogin);
-    // } 
 
 
 //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
@@ -306,7 +246,6 @@ async getOwnBagsWithOrder(
 
     return await this.farmerService.getOwnBagsWithOrder(authenticatedUserLogin);
 }
-
 
 
     //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)

@@ -20,11 +20,7 @@ export class AuthenticationMiddleware implements ExpressMiddlewareInterface {
         }
 
         try {
-            //request.body.user = jwt.verify(jwtToken, process.env.JWT_SECRET!) as JwtPayload;
             request.body.farmer = jwt.verify(jwtToken, process.env.JWT_SECRET!) as JwtPayload;
-
-            //console.log(request.body.user)
-            //console.log(request.body.farmer)
             next();
 
         } catch (err) {
