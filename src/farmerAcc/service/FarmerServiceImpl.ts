@@ -21,6 +21,7 @@ export default class FarmerServiceImpl implements FarmerService {
     
         if (existingFarmer) {
             throw new HttpError(409, `Farmer with login ${newFarmerDto.login} already exists`);
+            //res.status(409).json({ message: `Farmer with login ${newFarmerDto.login} already exists` });
         }
     
         const newFarmer = new Farmer({
@@ -290,7 +291,7 @@ export default class FarmerServiceImpl implements FarmerService {
         const bags = await Bag.find({ login: authenticatedUserLogin, customer: { $ne: 'none' } });
         if (bags.length === 0) {
             throw new HttpError(404, `Orders to farmer ${authenticatedUserLogin} not found`);
-        }
+        } 
         return bags.map(bag => {
             return new BagDto(bag.login, bag.name, bag.product, bag.description, bag.date, 
                 bag.customer, bag.confirmation, bag.payment, bag.confirmPayment)
