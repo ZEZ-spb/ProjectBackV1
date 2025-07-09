@@ -117,6 +117,18 @@ export default class ClientController {
     }
 
 
+//@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
+     @UseBefore(AuthenticationMiddleware)
+     @Get('/getClientByLogin/:login')
+     async getClientByLogin(
+        @Param('login') login: string 
+    ) {
+         return await this.clientService.getClientByLogin(login);
+     }
+
+
+
+
     //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
     @UseBefore(AuthenticationMiddleware)
     @Post('/createOrder')
@@ -154,6 +166,17 @@ export default class ClientController {
         
             return await this.clientService.getBagsWithOwnOrders(authenticatedUserLogin);
         }
+
+
+     //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
+     // @UseBefore(AuthenticationMiddleware)
+     // @Get('/getClientsByProduct/:product')
+     // async getClientsByProduct(
+     //      @Param('product') product: string
+     //      //@Res() res: Response
+     // ) {
+     //      return await this.clientService.getClientsByProduct(product);
+     // }     
         
         
      //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
@@ -169,6 +192,21 @@ export default class ClientController {
            }
           const authenticatedUserLogin = req.body.client.login; // Получаем login из токена
           return await this.clientService.cancelOrder(authenticatedUserLogin, body.farmer, body.bagName);
+     }
+
+
+     //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
+     @UseBefore(AuthenticationMiddleware)
+     @Get('/getAllProducts')
+     async getAllProducts(
+          // @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
+          @Res() res: Response
+     ) {
+          // if (req.body.client.role !== 'client') {
+          //      return res.status(403).json({ message: "You are not a client" });
+          //  }
+          // const authenticatedUserLogin = req.body.client.login; // Получаем login из токена
+          return await this.clientService.getAllProducts();
      }
 
 
@@ -202,10 +240,5 @@ export default class ClientController {
           const authenticatedUserLogin = req.body.client.login; // Получаем login из токена
           return await this.clientService.receiving(authenticatedUserLogin, body.farmer, body.bagName);
      }
-
-
-
-     
-
 
 }

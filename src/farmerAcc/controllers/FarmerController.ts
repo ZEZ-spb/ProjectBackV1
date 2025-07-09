@@ -54,7 +54,10 @@ export default class FarmerController {
             @Body() body: { newPassword: string },
             @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
             @Res() res: Response         
-        ) {
+        ) 
+        
+        {
+            console.log('req.body:', req.body);
             if (req.body.farmer.role !== 'farmer') {
                 return res.status(403).json({ message: "You are not a farmer" });
             }
@@ -119,7 +122,7 @@ export default class FarmerController {
 
     //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)     //Пока не надо, м.б. потом
      @UseBefore(AuthenticationMiddleware)
-     @Get('/getAllfarmers')
+     @Get('/getAllFarmers')
      async getAllFarmers(@Res() res: Response) {
          return await this.farmerService.getAllFarmers();
      }
@@ -198,6 +201,24 @@ export default class FarmerController {
     }
 
 
+     @UseBefore(AuthenticationMiddleware)
+     @Get('/getOwnBagByName/:name')
+     async getOwnBagByName (
+        @Param('name') name: string,
+        @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
+        @Res() res: Response
+     ) {
+        if (req.body.farmer.role !== 'farmer') {
+            return res.status(403).json({ message: "You are not a farmer" }); 
+        } 
+        const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
+        return this.farmerService.getOwnBagByName(
+            authenticatedUserLogin, // Передаем login из токена
+            name
+        );
+     }
+
+
     //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
     @UseBefore(AuthenticationMiddleware)
     @Get('/getBagsByProduct/:product')
@@ -248,7 +269,31 @@ async getOwnBagsWithOrder(
 }
 
 
-    //@UseBefore(AuthenticationMiddleware, AuthorizationMiddleware)
+    @UseBefore(AuthenticationMiddleware)
+     @Get('/getClientsByProduct/:product')
+     async getClientsByProduct(
+          @Param('product') product: string
+          //@Res() res: Response
+     ) {
+          return await this.farmerService.getClientsByProduct(product);
+     }
+
+
+    @UseBefore(AuthenticationMiddleware)
+     @Get('/getClientsOrderedBags')
+     async getClientsOrderedBags(
+          @Req() req: Request, // Добавляем Request, чтобы получить данные из middleware
+          @Res() res: Response
+     ) {
+          if (req.body.farmer.role !== 'farmer') {
+               return res.status(403).json({ message: "You are not a farmer" }); 
+          } 
+          const authenticatedUserLogin = req.body.farmer.login; // Получаем login из токена
+          return await this.farmerService.getClientsOrderedBags(authenticatedUserLogin);
+     }
+     
+
+    //@UseBeforeGet(AuthenticationMiddleware, AuthorizationMiddleware)
     @UseBefore(AuthenticationMiddleware)
     @Put('/confirmOrder/:bagName')
     async confirmOrder(

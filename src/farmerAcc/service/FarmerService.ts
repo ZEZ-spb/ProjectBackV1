@@ -2,6 +2,7 @@ import NewFarmerDto from "../dto/NewFarmerDto";
 import FarmerDto from "../dto/FarmerDto";
 import BagDto from "../dto/BagDto";
 import NewBagDto from "../dto/NewBagDto";
+import ClientDto from "../../clientAcc/dto/ClientDto";
 
 export default interface FarmerService {
 
@@ -61,6 +62,11 @@ export default interface FarmerService {
         name: string
     ): Promise<BagDto>;
 
+    getOwnBagByName(
+        authenticatedUserLogin: string, // Добавлен параметр для проверки
+        name: string
+    ): Promise<BagDto>;
+
     getBagsByProduct(
         product: string
     ): Promise<BagDto[]>;
@@ -76,6 +82,14 @@ export default interface FarmerService {
     getOwnBagsWithOrder(
         authenticatedUserLogin: string // Добавлен параметр для проверки
     ): Promise<BagDto[]>;
+
+    getClientsByProduct(
+        product: string
+    ): Promise<ClientDto[]>; 
+
+    getClientsOrderedBags(
+        authenticatedUserLogin: string // Добавлен параметр для проверки
+    ): Promise<ClientDto[]>;
     
     confirmOrder(
         authenticatedUserLogin: string, // Добавлен параметр для проверки   
@@ -86,6 +100,5 @@ export default interface FarmerService {
         authenticatedUserLogin: string, 
         bagName: string
     ): Promise<BagDto>;
-
     
 }

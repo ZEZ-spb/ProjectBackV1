@@ -118,6 +118,19 @@ export default class ClientServiceImpl implements ClientService {
              return new ClientDto(client.login, client.firstName, client.lastName,
                 client.email, client.phone, client.role);
         }
+
+
+    async getClientByLogin(login: string): Promise<ClientDto> {  
+         const client = await Client.findOne({login: login});
+         if (client === null) {
+             throw new HttpError(404, `Client with login ${login} not found`);
+         }
+         return new ClientDto(client.login, client.firstName, client.lastName,  
+            client.email, client.phone, client.role)
+     }
+
+
+
         
         
     async createOrder(customer: string, farmer: string, bagName: string): Promise<BagDto> {
@@ -149,6 +162,27 @@ export default class ClientServiceImpl implements ClientService {
     }
 
 
+    // async getClientsByProduct(product: string): Promise<ClientDto[]> {
+    //     const bags = await Bag.find({ product: product, customer: { $ne: 'none' } });
+    //     if (bags.length === 0) {
+    //         throw new HttpError(404, `No clients found for product ${product}`);
+    //     }
+    //     const clientsName = new Set<string>();
+    //     bags.map(bag => {
+    //         if (bag.customer !== 'none') {clientsName.add(bag.customer);              
+    //         }
+    //     })
+    //     const clients = await Client.find({ login: { $in: Array.from(clientsName) } });
+    //     if (clients.length === 0) {
+    //         throw new HttpError(404, `No clients found for product ${product}`);
+    //     }
+    //     return clients.map(client => {
+    //         return new ClientDto(client.login, client.firstName, client.lastName,
+    //             client.email, client.phone, client.role);
+    //     });
+    // }
+
+
     async cancelOrder(customer: string, farmer: string, bagName: string): Promise<BagDto> {
         const bag = await Bag.findOne({ login: farmer, name: bagName });
         if (bag === null) {
@@ -161,6 +195,24 @@ export default class ClientServiceImpl implements ClientService {
         await bag.save();           // save the updated bag to the database
         return new BagDto(bag.login, bag.name, bag.product, bag.description,
             bag.date, bag.customer, bag.confirmation, bag.payment, bag.confirmPayment);
+    }
+
+
+    async getAllProducts(): Promise<string[]> {
+        const bags = await Bag.find();
+        if (bags.length === 0) {
+            throw new HttpError(404, `No products found`);
+        }
+        const productsSet = new Set<string>();
+        bags.forEach(bag => {
+            if (bag.product) {
+                productsSet.add(bag.product);
+            }
+        });
+        if (productsSet.size === 0) {
+            throw new HttpError(404, `No products found`);
+        }
+        return Array.from(productsSet);
     }
 
 

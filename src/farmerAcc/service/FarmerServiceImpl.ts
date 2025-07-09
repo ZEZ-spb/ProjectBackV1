@@ -8,6 +8,8 @@ import jwt from "jsonwebtoken";
 import BagDto from "../dto/BagDto";
 import {Bag} from "../model/Bag";
 import NewBagDto from "../dto/NewBagDto";
+import ClientDto from "../../clientAcc/dto/ClientDto";
+import { Client } from "../../clientAcc/model/Client";
 //import expressAsyncHandler from "express-async-handler";
 //import { Request, Response, NextFunction } from "express";
 //import createHttpError from "http-errors";
@@ -206,7 +208,8 @@ export default class FarmerServiceImpl implements FarmerService {
         }
 
         if (existingBag.customer && existingBag.customer !== 'none') {
-            throw new ForbiddenError(`Bag with name ${name} is already ordered by customer ${existingBag.customer}`);
+            //throw new ForbiddenError(`Bag with name ${name} is already ordered by customer ${existingBag.customer}`);
+            throw new HttpError(403, `Bag with name ${name} is already ordered by customer`);
         }
     
         const newBag = await Bag.findOneAndUpdate(
@@ -238,17 +241,34 @@ export default class FarmerServiceImpl implements FarmerService {
     ): Promise<BagDto> {
         const existingBag = await Bag.findOne({ login: authenticatedUserLogin, name: name });
         if (existingBag === null) {
-            throw new HttpError(404, `Bag with name ${name} not found`);
+            throw new HttpError(404, `Your bag with name ${name} not found`);
         } 
 
         if(existingBag.customer && existingBag.customer !== 'none') {
-            throw new ForbiddenError(`Bag with name ${name} is already ordered by customer ${existingBag.customer}`);
+            throw new ForbiddenError(`Your bag with name ${name} is already ordered by customer ${existingBag.customer}`);
         }
         await existingBag.deleteOne(); // Удаляем существующий СБ
 
         return new BagDto(existingBag.login, existingBag.name, existingBag.product, existingBag.description, 
             existingBag.date, existingBag.customer, existingBag.confirmation, existingBag.payment, existingBag.confirmPayment);
     }
+
+
+    async getOwnBagByName (authenticatedUserLogin: string, // login пользователя из токена
+        name: string, // 
+    ): Promise<BagDto> {
+        const existingBag = await Bag.findOne({ login: authenticatedUserLogin, name: name });
+        if (existingBag === null) {
+            throw new HttpError(404, `Bag with name ${name} not found`);
+        } 
+
+        if(existingBag.customer && existingBag.customer !== 'none') {
+            throw new ForbiddenError(`Your bag with name ${name} is already ordered by customer ${existingBag.customer}`);
+        }
+
+        return new BagDto(existingBag.login, existingBag.name, existingBag.product, existingBag.description, 
+            existingBag.date, existingBag.customer, existingBag.confirmation, existingBag.payment, existingBag.confirmPayment);
+        }
 
 
     async getBagsByProduct(product: string): Promise<BagDto[]> {
@@ -299,6 +319,48 @@ export default class FarmerServiceImpl implements FarmerService {
     }
 
 
+    async getClientsByProduct(product: string): Promise<ClientDto[]> {
+        const bags = await Bag.find({ product: product, customer: { $ne: 'none' } });
+        if (bags.length === 0) {
+            throw new HttpError(404, `No clients found for product ${product}`);
+        }
+        const clientsName = new Set<string>();
+        bags.map(bag => {
+            if (bag.customer !== 'none') {clientsName.add(bag.customer);              
+            }
+        })
+        const clients = await Client.find({ login: { $in: Array.from(clientsName) } });
+        if (clients.length === 0) {
+            throw new HttpError(404, `No clients found for product ${product}`);
+        }
+        return clients.map(client => {
+            return new ClientDto(client.login, client.firstName, client.lastName,
+                client.email, client.phone, client.role);
+        });
+    }
+
+
+    async getClientsOrderedBags(authenticatedUserLogin: string): Promise<ClientDto[]> {
+        const bags = await Bag.find({ login: authenticatedUserLogin, customer: { $ne: 'none' } });
+        if (bags.length === 0) {
+            throw new HttpError(404, `No clients found for farmer ${authenticatedUserLogin}`);
+        }
+        const clientsName = new Set<string>();
+        bags.map(bag => {
+            if (bag.customer !== 'none') {clientsName.add(bag.customer);              
+            }
+        })
+        const clients = await Client.find({ login: { $in: Array.from(clientsName) } });
+        if (clients.length === 0) {
+            throw new HttpError(404, `No clients found for farmer ${authenticatedUserLogin}`);
+        }
+        return clients.map(client => {
+            return new ClientDto(client.login, client.firstName, client.lastName,
+                client.email, client.phone, client.role);
+        });
+    }
+
+
     async confirmOrder(authenticatedUserLogin: string, bagName: string): Promise<BagDto> {
         const bag = await Bag.findOne({ login: authenticatedUserLogin, name: bagName, 
             customer: { $ne: 'none' }, confirmation: false });
@@ -321,7 +383,7 @@ export default class FarmerServiceImpl implements FarmerService {
         const bag = await Bag.findOne({ login: authenticatedUserLogin, name: bagName, 
             customer: { $ne: 'none' }, confirmation: true, payment: true, confirmPayment: false });
         if (bag === null) {
-            throw new HttpError(404, `Bag with name ${bagName} or not found, or haven't customer, or already confirmed, or payment already confirmed`);
+            throw new HttpError(404, `Bag with name ${bagName} or not found, or haven't customer, or not payed, or payment already confirmed`);
         }    
         bag.confirmPayment = true; // set the payment confirmation to true
         await bag.save();           // save the updated bag to the database

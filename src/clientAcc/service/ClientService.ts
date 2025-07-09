@@ -32,6 +32,12 @@ export default interface ClientService {
         login: string
     ): Promise<ClientDto>;
 
+
+    getClientByLogin(
+        login: string
+    ): Promise<ClientDto>;
+    
+
     createOrder(
         customer: string, 
         farmer: string, 
@@ -40,7 +46,11 @@ export default interface ClientService {
 
     getBagsWithOwnOrders(
         customer: string // Добавлен параметр для проверки
-    ): Promise<BagDto[]>; 
+    ): Promise<BagDto[]>;
+    
+    // getClientsByProduct(
+    //     product: string
+    // ): Promise<ClientDto[]>;  
         
     cancelOrder(
         customer: string, 
@@ -48,6 +58,8 @@ export default interface ClientService {
         bagName: string
     ): Promise<BagDto>;
 
+    getAllProducts(): Promise<string[]>;
+       
     payment(
         customer: string, 
         farmer: string, 
