@@ -27,8 +27,9 @@
   },
   "name": "ProjectBackV1",
   "version": "1.0.0",
-  "main": "src/app.ts",
+  "main": "dist/app.js",
   "scripts": {
+    "start": "node dist/app.js", 
     "build": "tsc",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "test": "jest"
